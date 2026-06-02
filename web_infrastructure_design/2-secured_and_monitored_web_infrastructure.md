@@ -1,10 +1,10 @@
-# 2. Secured and Monitored Web Infrastructure
+# 🔒 2. Secured and Monitored Web Infrastructure
 
-## Infrastructure Diagram
+## 🗺️ Infrastructure Diagram
 
 ![Secured and Monitored Web Infrastructure](./assets/2-secured_and_monitored_web_infrastructure.png)
 
-## Why Each Additional Element Was Added
+## ➕ Why Each Additional Element Was Added
 
 1. **3 Firewalls**
    - **Firewall 1** (edge): Filters all incoming traffic before it reaches the load balancer. Blocks unauthorized IPs and malicious requests.
@@ -18,24 +18,24 @@
    - Collects metrics, logs, and performance data from each server and the database.
    - Enables proactive alerting, capacity planning, and incident investigation.
 
-## Specifics
+## 📋 Specifics
 
-- **What are firewalls for?**
+- **🧱 What are firewalls for?**
   Firewalls control incoming and outgoing network traffic based on security rules. They act as barriers between trusted internal networks and untrusted external networks, blocking unauthorized access while allowing legitimate traffic.
 
-- **Why is the traffic served over HTTPS?**
+- **🔐 Why is the traffic served over HTTPS?**
   HTTPS encrypts the data in transit using TLS/SSL. It ensures confidentiality (no one can read the data), integrity (no one can modify it), and authenticity (users know they are connecting to the real server, not an imposter).
 
-- **What is monitoring used for?**
+- **📈 What is monitoring used for?**
   Monitoring provides real-time visibility into infrastructure health, performance, and availability. It tracks CPU usage, memory, disk I/O, network latency, error rates, and application-specific metrics. It enables teams to detect anomalies, diagnose issues, and prevent outages before they impact users.
 
-- **How is the monitoring tool collecting data?**
+- **📡 How is the monitoring tool collecting data?**
   The monitoring client (agent) installed on each server continuously collects system metrics, application logs, and custom events. It sends this data via an outbound connection to the monitoring service (e.g., Sumologic). The data is aggregated, indexed, and visualized on dashboards. Alerts are triggered when thresholds are breached.
 
-- **What to do if you want to monitor your web server QPS (Queries Per Second)?**
+- **⏱️ What to do if you want to monitor your web server QPS (Queries Per Second)?**
   Configure the monitoring agent to parse the web server access logs (e.g., Nginx access logs). Create a custom metric or query that counts HTTP requests per second. In Sumologic, this would involve writing a log query that parses the timestamp and counts requests in 1-second buckets, then setting up a dashboard panel and an alert threshold.
 
-## Issues with this Infrastructure
+## ⚠️ Issues with this Infrastructure
 
 1. **Why terminating SSL at the load balancer level is an issue**
    - Traffic between the load balancer and the backend servers travels over **unencrypted HTTP**. If an attacker gains access to the internal network, they can intercept and read all communication. For true end-to-end security, SSL should be re-encrypted (SSL passthrough or re-encryption) from the load balancer to the application servers.
@@ -45,3 +45,11 @@
 
 3. **Why having servers with all the same components might be a problem**
    - Running the database, web server, and application server on the same machines creates **resource contention**. The database is I/O and memory intensive, while the web server is network intensive. They compete for the same resources, leading to unpredictable performance. It also violates the principle of **separation of concerns** and makes scaling individual components independently impossible.
+
+---
+
+<div align="center">
+
+⬅️ [Back to README](./README.md)
+
+</div>
