@@ -1,14 +1,5 @@
 # Holberton Web Infrastructure Lab — Docker Version
 
-**Alternative légère à Vagrant.** Même architecture, mais en containers Docker.
-
-## Pourquoi Docker ?
-
-- **Plus rapide** : ~30 secondes pour tout lancer
-- **Plus léger** : pas de VMs, pas de VirtualBox
-- **Natif sur Arch** : `pacman -S docker docker-compose`
-- **Même résultat** : LB + 2 Web Servers + DB
-
 ## Architecture
 
 ```
@@ -81,13 +72,6 @@ docker-compose start       # Relancer
 docker system prune -f     # Nettoyer tout
 ```
 
-## Ce que tu peux pratiquer
-
-- **Load Balancer** : `curl localhost:8080` plusieurs fois → Round Robin alterne entre web1/web2
-- **SPOF simulation** : `docker-compose stop web1` → curl marche toujours (redirige sur web2)
-- **Séparation des tiers** : chaque service est isolé, communique via le réseau Docker
-- **Monitoring** : `docker stats` pour voir CPU/RAM en temps réel
-
 ## Whiteboard Training
 
 Même exercice que pour la review Holberton :
@@ -107,14 +91,3 @@ docker-compose down -v   # Supprime containers + volumes + réseau
 
 ---
 
-## Différence Vagrant vs Docker
-
-| | Vagrant | Docker |
-|---|---|---|
-| VMs | 4 VMs complètes | 4 containers légers |
-| RAM | ~2GB | ~200MB |
-| Temps de lancement | ~10-15 min | ~30 sec |
-| VirtualBox | Oui | Non |
-| Réalisme | Plus proche du vrai serveur | Suffisant pour apprendre |
-
-**Conseil :** Utilise Docker pour apprendre vite. Passe à Vagrant plus tard si tu veux vraiment simuler des machines physiques.
