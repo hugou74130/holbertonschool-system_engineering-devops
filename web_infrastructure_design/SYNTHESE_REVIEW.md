@@ -145,23 +145,7 @@ User → DNS → Firewall → [HAproxy 1] ↔ [HAproxy 2] (cluster)
 
 ---
 
-## Ce Que Tu Dois Savoir Dessiner (Whiteboard)
 
-Pour chaque tâche, tu dois dessiner sur un tableau blanc :
-1. **Les flèches** : qui communique avec qui
-2. **Les composants** : serveurs, load balancer, base de données, firewalls
-3. **Les protocoles** : HTTP/HTTPS, TCP/IP
-4. **Les IPs / DNS records**
-5. **Le flow** : User → DNS → LB → Server → DB → retour
-
-**Règles de la review Holberton :**
-- **30 minutes max**
-- **Pas d'ordinateur, pas de notes** pendant le whiteboard
-- Réponds à ce qu'on te demande, pas plus (évite d'être trop verbeux)
-- Pose la question "tu veux que j'aille dans le détail ?" si tu sens que tu dérives
-- Le but = montrer que tu comprends, pas reciter Wikipedia
-
----
 
 ## Checklist Mentale Avant la Review
 
@@ -176,5 +160,3 @@ Pour chaque tâche, tu dois dessiner sur un tableau blanc :
 - [ ] Je sais comment monitorer le QPS (parser les logs Nginx)
 
 ---
-
-Bonne chance pour ta review ! 🎯
