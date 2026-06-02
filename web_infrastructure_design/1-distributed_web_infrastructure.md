@@ -1,52 +1,8 @@
 # 1. Distributed Web Infrastructure
 
-## Diagram
+## Infrastructure Diagram
 
-```
-+-----------+         +----------------------+
-|   User    |         |   www.foobar.com     |
-|  Browser  | ------> |   DNS (A Record)     |
-+-----------+         |   Points to LB IP    |
-                      +----------------------+
-                                |
-                                v
-                      +----------------------+
-                      |   Load Balancer      |
-                      |   (HAproxy)          |
-                      |   Active-Active      |
-                      +----------------------+
-                                |
-            +-------------------+-------------------+
-            |                                       |
-            v                                       v
-   +--------------------+                 +--------------------+
-   |   Server 1         |                 |   Server 2         |
-   |  +--------------+  |                 |  +--------------+  |
-   |  |   Nginx      |  |                 |  |   Nginx      |  |
-   |  | (Web Server) |  |                 |  | (Web Server) |  |
-   |  +--------------+  |                 |  +--------------+  |
-   |  +--------------+  |                 |  +--------------+  |
-   |  | Application  |  |                 |  | Application  |  |
-   |  | Server       |  |                 |  | Server       |  |
-   |  +--------------+  |                 |  +--------------+  |
-   |  +--------------+  |                 |  +--------------+  |
-   |  | App Files    |  |                 |  | App Files    |  |
-   |  +--------------+  |                 |  +--------------+  |
-   +--------------------+                 +--------------------+
-            |                                       |
-            +-------------------+-------------------+
-                                |
-                                v
-                      +----------------------+
-                      |   Database           |
-                      |   (MySQL)            |
-                      |   Primary-Replica    |
-                      |   (Master-Slave)     |
-                      +----------------------+
-                      | Primary |   Replica  |
-                      | (Write) |  (Read)    |
-                      +----------------------+
-```
+![Distributed Web Infrastructure](./assets/1-distributed_web_infrastructure.png)
 
 ## Why Each Additional Element Was Added
 

@@ -1,36 +1,8 @@
 # 0. Simple Web Stack
 
-## Diagram
+## Infrastructure Diagram
 
-```
-+-----------+         +----------------------+
-|   User    |         |   www.foobar.com     |
-|  Browser  | ------> |   DNS (A Record)     |
-+-----------+         |   Points to 8.8.8.8  |
-                      +----------------------+
-                                |
-                                v
-                      +----------------------+
-                      |   Server (8.8.8.8)   |
-                      |  +----------------+  |
-                      |  |   Nginx        |  |
-                      |  |  (Web Server)  |  |
-                      |  +----------------+  |
-                      |  +----------------+  |
-                      |  | Application    |  |
-                      |  | Server (e.g.,  |  |
-                      |  |  Gunicorn)     |  |
-                      |  +----------------+  |
-                      |  +----------------+  |
-                      |  | Application    |  |
-                      |  | Files (Code)   |  |
-                      |  +----------------+  |
-                      |  +----------------+  |
-                      |  |  MySQL         |  |
-                      |  |  (Database)    |  |
-                      |  +----------------+  |
-                      +----------------------+
-```
+![Simple Web Stack](./assets/0-simple_web_stack.png)
 
 ## User Journey
 

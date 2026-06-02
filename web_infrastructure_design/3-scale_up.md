@@ -1,47 +1,8 @@
 # 3. Scale Up
 
-## Diagram
+## Infrastructure Diagram
 
-```
-+-----------+         +----------------------+
-|   User    |         |   www.foobar.com     |
-|  Browser  | -------> |   DNS (A Record)     |
-+-----------+         +----------------------+
-                                |
-                                | HTTPS (443)
-                                v
-                      +----------------------+
-                      |   Firewall           |
-                      +----------------------+
-                                |
-            +-------------------+-------------------+
-            |                                       |
-            v                                       v
-   +--------------------+                 +--------------------+
-   |  Load Balancer 1   | <-------------> |  Load Balancer 2   |
-   |  (HAproxy)         |    Clustered     |  (HAproxy)         |
-   |  Active            |    VRRP / Keepal. |  Passive           |
-   +--------------------+                 +--------------------+
-            |                                       |
-            +-------------------+-------------------+
-                                |
-                                v
-                      +----------------------+
-                      |   Firewall           |
-                      +----------------------+
-                                |
-            +-------------------+-------------------+-------------------+
-            |                   |                                       |
-            v                   v                                       v
-   +----------------+   +----------------+                    +----------------+
-   |  Web Server    |   | Application    |                    |   Database     |
-   |  (Nginx)       |   | Server         |                    |  (MySQL)       |
-   |                |   |                |                    |                |
-   | Serves static  |   | Runs app code  |                    | Primary-Replica|
-   | files, reverse |   | Processes logic|                    | (if needed)    |
-   | proxies to app |   | Queries DB     |                    |                |
-   +----------------+   +----------------+                    +----------------+
-```
+![Scale Up Infrastructure](./assets/3-scale_up.png)
 
 ## Why Each Additional Element Was Added
 

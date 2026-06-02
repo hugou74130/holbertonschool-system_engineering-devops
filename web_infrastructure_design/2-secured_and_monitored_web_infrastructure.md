@@ -1,71 +1,8 @@
 # 2. Secured and Monitored Web Infrastructure
 
-## Diagram
+## Infrastructure Diagram
 
-```
-+-----------+         +----------------------+
-|   User    |         |   www.foobar.com     |
-|  Browser  | -------> |   DNS (A Record)     |
-+-----------+         +----------------------+
-                                |
-                                | HTTPS (443)
-                                v
-                      +----------------------+
-                      |   Firewall 1         |
-                      |  (Network Edge)      |
-                      +----------------------+
-                                |
-                                v
-                      +----------------------+
-                      |   Load Balancer      |
-                      |   (HAproxy)          |
-                      |   + SSL Certificate  |
-                      |   Terminates HTTPS   |
-                      +----------------------+
-                                |
-            +-------------------+-------------------+
-            |                                       |
-            v                                       v
-   +--------------------+                 +--------------------+
-   |   Firewall 2       |                 |   Firewall 3       |
-   +--------------------+                 +--------------------+
-            |                                       |
-            v                                       v
-   +--------------------+                 +--------------------+
-   |   Server 1         |                 |   Server 2         |
-   |  +--------------+  |                 |  +--------------+  |
-   |  |   Nginx      |  |                 |  |   Nginx      |  |
-   |  +--------------+  |                 |  +--------------+  |
-   |  +--------------+  |                 |  +--------------+  |
-   |  | Application  |  |                 |  | Application  |  |
-   |  | Server       |  |                 |  | Server       |  |
-   |  +--------------+  |                 |  +--------------+  |
-   |  +--------------+  |                 |  +--------------+  |
-   |  | App Files    |  |                 |  | App Files    |  |
-   |  +--------------+  |                 |  +--------------+  |
-   |  +--------------+  |                 |  +--------------+  |
-   |  | Monitoring   |  |                 |  | Monitoring   |  |
-   |  | Client       |  |                 |  | Client       |  |
-   |  | (Sumologic)  |  |                 |  | (Sumologic)  |  |
-   |  +--------------+  |                 |  +--------------+  |
-   +--------------------+                 +--------------------+
-            |                                       |
-            +-------------------+-------------------+
-                                |
-                                v
-                      +----------------------+
-                      |   Firewall 4         |
-                      +----------------------+
-                                |
-                                v
-                      +----------------------+
-                      |   Database           |
-                      |   (MySQL)            |
-                      |   Primary-Replica    |
-                      |   + Monitoring       |
-                      |     Client           |
-                      +----------------------+
-```
+![Secured and Monitored Web Infrastructure](./assets/2-secured_and_monitored_web_infrastructure.png)
 
 ## Why Each Additional Element Was Added
 
