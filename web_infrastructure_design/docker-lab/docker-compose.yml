@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  lb:
+    image: haproxy:2.8-alpine
+    container_name: holberton-lb
+    ports:
+      - "8080:80"
+    volumes:
+      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+    networks:
+      - holberton-net
+    depends_on:
+      - web1
+      - web2
+
+  web1:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    container_name: holberton-web1
+    networks:
+      - holberton-net
+    environment:
+      - SERVER_NAME=web1
+
+  web2:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    container_name: holberton-web2
+    networks:
+      - holberton-net
+    environment:
+      - SERVER_NAME=web2
+
+  db:
+    image: mysql:8.0
+    container_name: holberton-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_DATABASE: holberton_db
+      MYSQL_USER: appuser
+      MYSQL_PASSWORD: holberton123
+    networks:
+      - holberton-net
+    volumes:
+      - db_data:/var/lib/mysql
+
+networks:
+  holberton-net:
+    driver: bridge
+
+volumes:
+  db_data:
