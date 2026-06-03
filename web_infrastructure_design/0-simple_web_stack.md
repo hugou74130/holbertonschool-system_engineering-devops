@@ -6,16 +6,36 @@
 
 **Le scénario :** Un utilisateur tape `www.foobar.com` dans son navigateur.
 
-**Le flux de la requête :**
+**Le flux complet (Aller + Retour) :**
 
-1. **DNS** — Le navigateur demande au DNS : "Quelle est l'IP de `www.foobar.com` ?" → Réponse : `8.8.8.8`
-2. La requête HTTP arrive sur le **serveur unique**
-3. **Web Server (Nginx)** — Reçoit la requête. S'il s'agit de fichiers statiques (HTML, CSS, images), il les sert directement
-4. **Application Server** — Si la requête nécessite du calcul (ex: générer une page dynamique), Nginx la transmet à l'app server qui exécute le code
-5. **Database (MySQL)** — Si l'application a besoin de données, elle interroge la base de données
-6. La réponse remonte jusqu'à l'utilisateur
+```
+Aller (Requête) :
+┌─────────┐     ┌─────────┐     ┌─────────────────────────────────────────┐
+│Client   │────▶│   DNS   │────▶│           Serveur Unique                │
+│(Browser)│     │(Resolve)│     │  ┌─────────┐  ┌─────────┐  ┌────────┐  │
+└─────────┘     └─────────┘     │  │  Nginx  │──│   App   │──│ MySQL  │  │
+                                  │  │ (Web)   │  │ Server  │  │ (DB)   │  │
+                                  │  └─────────┘  └─────────┘  └────────┘  │
+                                  └─────────────────────────────────────────┘
 
-**Communication :** Le serveur communique avec l'ordinateur de l'utilisateur via le **protocole TCP/IP** (HTTP sur port 80).
+Retour (Réponse HTTP) :
+┌─────────┐     ┌─────────┐     ┌─────────────────────────────────────────┐
+│Client   │◄────│   DNS   │◄────│           Serveur Unique                │
+│(Browser)│     │(Resolve)│     │  ┌─────────┐  ┌─────────┐  ┌────────┐  │
+└─────────┘     └─────────┘     │  │  Nginx  │◄─│   App   │◄─│ MySQL  │  │
+                                  │  │ (Web)   │  │ Server  │  │ (DB)   │  │
+                                  │  └─────────┘  └─────────┘  └────────┘  │
+                                  └─────────────────────────────────────────┘
+```
+
+1. **DNS (Aller)** — Le navigateur demande au DNS : "Quelle est l'IP de `www.foobar.com` ?" → Réponse : `8.8.8.8`
+2. **Requête HTTP** arrive sur le **serveur unique**
+3. **Nginx (Web Server)** — Reçoit la requête. Si c'est du statique, il sert directement
+4. **App Server** — Si c'est du dynamique, Nginx transmet à l'app server
+5. **MySQL** — Si besoin de données, l'app server interroge la DB
+6. **Retour** — La réponse remonte : MySQL → App → Nginx → puis repart au client via la **même connexion TCP**
+
+**Communication :** Le serveur communique avec l'ordinateur de l'utilisateur via le **protocole TCP/IP** (HTTP sur port 80). La réponse utilise la **même connexion TCP** établie par la requête.
 
 ---
 
