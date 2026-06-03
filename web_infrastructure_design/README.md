@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🏗️ Web Infrastructure Design
+# Web Infrastructure Design
 
 *From a single server to a resilient, monitored, multi-tier architecture.*
 
@@ -13,17 +13,17 @@
 
 ---
 
-## 📖 Description
+## Description
 
 This project is a journey through modern web infrastructure design, entirely explored through whiteboarding and conceptual diagrams. Starting from a classic **LAMP stack** on a single machine, we incrementally build toward a fully distributed, secured, and monitored architecture.
 
 Each task breaks down the *why* behind every component — because knowing how to draw the box is easy; explaining what happens when the box breaks is what separates a technician from an engineer.
 
-> ⚠️ **No code to run here.** This repository is a collection of diagrams, explanations, and infrastructure narratives. Every architecture was drawn from memory and explained out loud during review.
+> **No code to run here.** This repository is a collection of diagrams, explanations, and infrastructure narratives. Every architecture was drawn from memory and explained out loud during review.
 
 ---
 
-## 🎯 Learning Objectives
+## Learning Objectives
 
 By the end of this project, you can confidently:
 
@@ -35,7 +35,7 @@ By the end of this project, you can confidently:
 
 ---
 
-## 🛠️ Concepts & Technologies
+## Concepts & Technologies
 
 | Layer | Component | Role |
 |-------|-----------|------|
@@ -50,7 +50,7 @@ By the end of this project, you can confidently:
 
 ---
 
-## ⚙️ Requirements
+## Requirements
 
 - **OS**: Ubuntu 20.04 LTS
 - **No executable code** — diagrams and explanations only
@@ -60,7 +60,7 @@ By the end of this project, you can confidently:
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ```bash
 git clone https://github.com/hugou74130/holbertonschool-system_engineering-devops.git
@@ -78,7 +78,7 @@ cat 3-scale_up.md
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 
 ```
 web_infrastructure_design/
@@ -96,10 +96,10 @@ web_infrastructure_design/
 
 ---
 
-## 📋 Task Overview
+## Task Overview
 
 ### Task 0 — Simple Web Stack
-- **Status**: Mandatory ✅
+- **Status**: Mandatory
 - **Focus**: Design a single-server infrastructure for `www.foobar.com` (A record → `8.8.8.8`).
 - **Stack**: Nginx → App Server → MySQL on one machine.
 - **Key takeaway**: Understand the request flow and spot the obvious weaknesses (SPOF, maintenance downtime, no scaling).
@@ -107,7 +107,7 @@ web_infrastructure_design/
 ---
 
 ### Task 1 — Distributed Web Infrastructure
-- **Status**: Mandatory ✅
+- **Status**: Mandatory
 - **Focus**: Split the stack across three servers with a load balancer and a Primary-Replica database.
 - **Key questions**: Round Robin vs leastconn? Active-Active vs Active-Passive? How does the Replica stay in sync?
 - **Key takeaway**: Distribution removes some SPOFs but introduces new ones (load balancer, Primary DB). Security and monitoring are still missing.
@@ -115,7 +115,7 @@ web_infrastructure_design/
 ---
 
 ### Task 2 — Secured and Monitored Web Infrastructure
-- **Status**: Mandatory ✅
+- **Status**: Mandatory
 - **Focus**: Harden the architecture with firewalls, SSL termination, and monitoring clients.
 - **Key questions**: Why HTTPS? Why terminate SSL at the LB? How do you measure QPS?
 - **Key takeaway**: Security and observability are not optional. Even with these additions, identical component stacking and a single writable DB node remain architectural debts.
@@ -123,13 +123,13 @@ web_infrastructure_design/
 ---
 
 ### Task 3 — Scale Up
-- **Status**: Advanced ✅
+- **Status**: Advanced
 - **Focus**: Evolve into a true 3-tier architecture with clustered load balancers and dedicated servers per role.
 - **Key takeaway**: Separation of concerns is the foundation of horizontal scaling. Each tier can now be optimized, replaced, or scaled independently without affecting the others.
 
 ---
 
-## 🧠 Author
+## Author
 
 **Hugo** — *Student at Holberton School*
 
