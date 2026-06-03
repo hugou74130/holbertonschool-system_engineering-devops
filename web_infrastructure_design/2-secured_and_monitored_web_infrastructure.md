@@ -1,54 +1,18 @@
-# 🔒 2. Secured and Monitored Web Infrastructure
-
-## 🗺️ Infrastructure Diagram
+# 2. Secured and Monitored Web Infrastructure
 
 ![Secured and Monitored Web Infrastructure](./assets/2-secured_and_monitored_web_infrastructure.png)
 
-## ➕ Why Each Additional Element Was Added
+- Le firewall filtre le traffic réseau entrant et sortant d'une machine.
+- L'étudiant a dessiné un firewall sur le diagramme.
+- Le load balancer est un point de défaillance unique.
+- HTTPS est configuré pour que si quelqu'un intercepte le traffic, il ne puisse pas le lire.
+- Le monitoring peut être utilisé pour vérifier si quelque chose est cassé ou lent.
+- Le setup de monitoring est composé d'un client qui collecte les données et les envoie au système de monitoring.
+- Configurer le monitoring pour : collecter les données du web server ; avoir une alerte déclenchée si le QPS devient hors de contrôle.
 
-1. **3 Firewalls**
-   - **Firewall 1** (edge): Filters all incoming traffic before it reaches the load balancer. Blocks unauthorized IPs and malicious requests.
-   - **Firewall 2 & 3** (application layer): Protect each application server individually. Only allow traffic from the load balancer and block direct access from the internet. The database cluster is protected indirectly by these firewalls — no direct public access is allowed.
+## Problèmes
 
-2. **SSL Certificate**
-   - Encrypts all traffic between the user's browser and the load balancer using HTTPS. Prevents man-in-the-middle attacks, eavesdropping, and data tampering.
-
-3. **3 Monitoring Clients (Sumologic or similar)**
-   - Collects metrics, logs, and performance data from each server and the database.
-   - Enables proactive alerting, capacity planning, and incident investigation.
-
-## 📋 Specifics
-
-- **🧱 What are firewalls for?**
-  Firewalls control incoming and outgoing network traffic based on security rules. They act as barriers between trusted internal networks and untrusted external networks, blocking unauthorized access while allowing legitimate traffic.
-
-- **🔐 Why is the traffic served over HTTPS?**
-  HTTPS encrypts the data in transit using TLS/SSL. It ensures confidentiality (no one can read the data), integrity (no one can modify it), and authenticity (users know they are connecting to the real server, not an imposter).
-
-- **📈 What is monitoring used for?**
-  Monitoring provides real-time visibility into infrastructure health, performance, and availability. It tracks CPU usage, memory, disk I/O, network latency, error rates, and application-specific metrics. It enables teams to detect anomalies, diagnose issues, and prevent outages before they impact users.
-
-- **📡 How is the monitoring tool collecting data?**
-  The monitoring client (agent) installed on each server continuously collects system metrics, application logs, and custom events. It sends this data via an outbound connection to the monitoring service (e.g., Sumologic). The data is aggregated, indexed, and visualized on dashboards. Alerts are triggered when thresholds are breached.
-
-- **⏱️ What to do if you want to monitor your web server QPS (Queries Per Second)?**
-  Configure the monitoring agent to parse the web server access logs (e.g., Nginx access logs). Create a custom metric or query that counts HTTP requests per second. In Sumologic, this would involve writing a log query that parses the timestamp and counts requests in 1-second buckets, then setting up a dashboard panel and an alert threshold.
-
-## ⚠️ Issues with this Infrastructure
-
-1. **Why terminating SSL at the load balancer level is an issue**
-   - Traffic between the load balancer and the backend servers travels over **unencrypted HTTP**. If an attacker gains access to the internal network, they can intercept and read all communication. For true end-to-end security, SSL should be re-encrypted (SSL passthrough or re-encryption) from the load balancer to the application servers.
-
-2. **Why having only one MySQL server capable of accepting writes is an issue**
-   - The Primary database is a **SPOF for write operations**. If it fails, the entire application loses the ability to create, update, or delete data. Automatic failover to the Replica is not trivial and may involve data loss or inconsistency during the promotion process.
-
-3. **Why having servers with all the same components might be a problem**
-   - Running the database, web server, and application server on the same machines creates **resource contention**. The database is I/O and memory intensive, while the web server is network intensive. They compete for the same resources, leading to unpredictable performance. It also violates the principle of **separation of concerns** and makes scaling individual components independently impossible.
-
----
-
-<div align="center">
-
-⬅️ [Back to README](./README.md)
-
-</div>
+- Terminer le SSL au niveau du load balancer est un problème car le traffic entre le load balancer et les web servers n'est pas encrypté.
+- N'avoir qu'un seul serveur MySQL capable d'accepter des écritures est un problème car si le master tombe, l'application ne peut plus écrire dans la database.
+- Avoir les mêmes composants sur tous les serveurs (database, web server et application server) peut être un problème car leur consommation ne va pas croître de la même manière entre eux (on pourrait vouloir avoir plus de database servers que de application servers par exemple).
+- Avoir les mêmes composants sur tous les serveurs peut être un problème car quand il y a de la maintenance sur un serveur pour un composant spécifique, ça affecte les autres composants qui sont dessus.
