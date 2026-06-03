@@ -8,8 +8,7 @@
 
 1. **3 Firewalls**
    - **Firewall 1** (edge): Filters all incoming traffic before it reaches the load balancer. Blocks unauthorized IPs and malicious requests.
-   - **Firewall 2 & 3** (application layer): Protect each application server individually. Only allow traffic from the load balancer and block direct access from the internet.
-   - **Firewall 4** (database layer): Isolates the database. Only allows connections from the application servers, preventing direct public access.
+   - **Firewall 2 & 3** (application layer): Protect each application server individually. Only allow traffic from the load balancer and block direct access from the internet. The database cluster is protected indirectly by these firewalls — no direct public access is allowed.
 
 2. **SSL Certificate**
    - Encrypts all traffic between the user's browser and the load balancer using HTTPS. Prevents man-in-the-middle attacks, eavesdropping, and data tampering.
