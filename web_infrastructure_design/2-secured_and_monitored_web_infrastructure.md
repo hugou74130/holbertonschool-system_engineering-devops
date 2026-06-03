@@ -6,65 +6,16 @@
 
 **Le scénario :** Un utilisateur tape `www.foobar.com` dans son navigateur.
 
-**Le flux complet (Aller + Retour) :**
+**Le flux de la requête :**
 
-```
-Aller (Requête HTTPS) :
-┌─────────┐     ┌─────────┐     ┌──────────┐     ┌─────────┐     ┌──────────────────────────┐
-│Client   │────▶│   DNS   │────▶│ Firewall │────▶│ HAproxy │────▶│      Serveur 1 ou 2      │
-│(Browser)│     │(Resolve)│     │  (Edge)  │     │  (LB)   │     │  ┌─────────┐  ┌────────┐ │
-└─────────┘     └─────────┘     └──────────┘     │  (SSL    │     │  │  Nginx  │──│  App   │ │
-                                                  │  Term.) │     │  │ (Web)   │  │ Server │ │
-                                                  └─────────┘     │  └─────────┘  └────────┘ │
-                                                                    │              │         │
-                                                                    │         ┌────▼────┐    │
-                                                                    │         │  MySQL  │    │
-                                                                    │         │Primary ─┼──▶ Replica
-                                                                    │         │  (R+W)  │    │
-                                                                    │         └─────────┘    │
-                                                                    │                        │
-                                                                    │  ┌─────────────┐        │
-                                                                    │  │  Firewall   │        │
-                                                                    │  │   (UFW)     │        │
-                                                                    │  └─────────────┘        │
-                                                                    │  ┌─────────────┐        │
-                                                                    │  │   Monitor   │        │
-                                                                    │  │   Client    │        │
-                                                                    │  └─────────────┘        │
-                                                                    └──────────────────────────┘
-
-Retour (Réponse HTTPS) :
-┌─────────┐     ┌─────────┐     ┌──────────┐     ┌─────────┐     ┌──────────────────────────┐
-│Client   │◄────│   DNS   │◄────│ Firewall │◄────│ HAproxy │◄────│      Serveur 1 ou 2      │
-│(Browser)│     │(Resolve)│     │  (Edge)  │     │  (LB)   │     │  ┌─────────┐  ┌────────┐ │
-└─────────┘     └─────────┘     └──────────┘     │  (SSL    │     │  │  Nginx  │◄─│  App   │ │
-                                                  │  Term.) │     │  │ (Web)   │  │ Server │ │
-                                                  └─────────┘     │  └─────────┘  └────────┘ │
-                                                                    │              ▲         │
-                                                                    │         ┌────┴────┐    │
-                                                                    │         │  MySQL  │    │
-                                                                    │         │Primary ◀─┼──◀ Replica
-                                                                    │         │  (R+W)  │    │
-                                                                    │         └─────────┘    │
-                                                                    │                        │
-                                                                    │  ┌─────────────┐        │
-                                                                    │  │  Firewall   │        │
-                                                                    │  │   (UFW)     │        │
-                                                                    │  └─────────────┘        │
-                                                                    │  ┌─────────────┐        │
-                                                                    │  │   Monitor   │        │
-                                                                    │  │   Client    │        │
-                                                                    │  └─────────────┘        │
-                                                                    └──────────────────────────┘
-```
-
-1. **DNS (Aller)** — Le navigateur demande au DNS : "Quelle est l'IP de `www.foobar.com` ?"
-2. **Firewall Edge** — Filtre le traffic malveillant avant qu'il n'entre
-3. **HAproxy + SSL Termination** — Décrypte HTTPS → HTTP pour les serveurs internes
-4. **Firewall UFW** — Filtre le traffic sur chaque serveur
-5. **Nginx → App → MySQL** — Traitement de la requête
-6. **Monitor Client** — Collecte les métriques en parallèle
-7. **Retour** — La réponse remonte : MySQL → App → Nginx → HAproxy (re-chiffre en HTTPS) → Firewall Edge → Client
+1. **DNS** — Le navigateur demande au DNS : "Quelle est l'IP de `www.foobar.com` ?"
+2. La requête arrive en **HTTPS** (port 443) sur le **Firewall Edge**
+3. Le Firewall filtre le traffic malveillant et le laisse passer vers le **Load Balancer**
+4. **HAproxy** reçoit la requête, termine le SSL (déchiffre HTTPS → HTTP)
+5. La requête passe par les **Firewalls** des serveurs applicatifs
+6. Le **serveur choisi** traite la requête : Nginx → App Server → MySQL
+7. Le **Monitoring Client** sur chaque serveur collecte les métriques et les envoie au service de monitoring
+8. La réponse remonte jusqu'à l'utilisateur
 
 ---
 

@@ -6,56 +6,16 @@
 
 **Le scénario :** Un utilisateur tape `www.foobar.com` dans son navigateur.
 
-**Le flux complet (Aller + Retour) :**
+**Le flux de la requête :**
 
-```
-Aller (Requête) :
-┌─────────┐     ┌─────────┐     ┌─────────────────┐     ┌─────────────────┐
-│Client   │────▶│   DNS   │────▶│  LB Cluster     │────▶│   Web Servers   │
-│(Browser)│     │(Resolve)│     │  (HAproxy 1   │     │   (Nginx only)  │
-└─────────┘     └─────────┘     │   HAproxy 2)    │     │                 │
-                                  │  Active-Active  │     └────────┬────────┘
-                                  │   Failover      │              │
-                                  └─────────────────┘              ▼
-                                                          ┌─────────────────┐
-                                                          │  App Servers    │
-                                                          │ (Gunicorn, etc.)│
-                                                          └────────┬────────┘
-                                                                   │
-                                                                   ▼
-                                                          ┌─────────────────┐
-                                                          │  MySQL Cluster  │
-                                                          │  Primary ───────┼──▶ Replica
-                                                          │   (R+W)         │
-                                                          └─────────────────┘
-
-Retour (Réponse HTTP) :
-┌─────────┐     ┌─────────┐     ┌─────────────────┐     ┌─────────────────┐
-│Client   │◄────│   DNS   │◄────│  LB Cluster     │◄────│   Web Servers   │
-│(Browser)│     │(Resolve)│     │  (HAproxy 1   │     │   (Nginx only)  │
-└─────────┘     └─────────┘     │   HAproxy 2)    │     │                 │
-                                  │  Active-Active  │     └────────▲────────┘
-                                  │   Failover      │              │
-                                  └─────────────────┘              │
-                                                          ┌─────────────────┐
-                                                          │  App Servers    │
-                                                          │ (Gunicorn, etc.)│
-                                                          └────────▲────────┘
-                                                                   │
-                                                                   │
-                                                          ┌─────────────────┐
-                                                          │  MySQL Cluster  │
-                                                          │  Primary ◀──────┼──◀ Replica
-                                                          │   (R+W)         │
-                                                          └─────────────────┘
-```
-
-1. **DNS (Aller)** — Le navigateur demande au DNS : "Quelle est l'IP de `www.foobar.com` ?" → Réponse : IP virtuelle du cluster de Load Balancers
-2. **LB Cluster** — HAproxy 1 ou HAproxy 2 reçoit la requête. Si un tombe, l'autre prend le relais (failover)
-3. **Web Servers (Nginx)** — Servent les assets statiques et font reverse proxy vers les App Servers
-4. **App Servers** — Exécutent le code métier et interroge le MySQL Cluster si besoin
-5. **MySQL Cluster** — Primary gère les écritures, Replica gère les lectures
-6. **Retour** — La réponse remonte : MySQL → App → Web → LB Cluster → Client
+1. **DNS** — Le navigateur demande au DNS : "Quelle est l'IP de `www.foobar.com` ?" → Réponse : IP virtuelle du cluster de Load Balancers
+2. La requête arrive sur le **Load Balancer Cluster** (HAproxy 1 ou HAproxy 2)
+3. Si HAproxy 1 tombe, HAproxy 2 prend le relais automatiquement (failover)
+4. Le LB distribue la requête à un **Web Server** (Nginx only)
+5. Nginx sert les fichiers statiques et fait reverse proxy vers un **App Server**
+6. L'App Server exécute le code métier et interroge le **MySQL Cluster** si besoin
+7. MySQL Primary gère les écritures, Replica gère les lectures
+8. La réponse remonte jusqu'à l'utilisateur
 
 ---
 

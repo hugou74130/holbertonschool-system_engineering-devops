@@ -6,44 +6,13 @@
 
 **Le scénario :** Un utilisateur tape `www.foobar.com` dans son navigateur.
 
-**Le flux complet (Aller + Retour) :**
+**Le flux de la requête :**
 
-```
-Aller (Requête) :
-┌─────────┐     ┌─────────┐     ┌─────────┐     ┌──────────────────────────┐
-│Client   │────▶│   DNS   │────▶│ HAproxy │────▶│      Serveur 1 ou 2      │
-│(Browser)│     │(Resolve)│     │  (LB)   │     │  ┌─────────┐  ┌────────┐ │
-└─────────┘     └─────────┘     └─────────┘     │  │  Nginx  │──│  App   │ │
-                                                  │  │ (Web)   │  │ Server │ │
-                                                  │  └─────────┘  └────────┘ │
-                                                  │              │             │
-                                                  │         ┌────▼────┐        │
-                                                  │         │  MySQL  │        │
-                                                  │         │Primary ─┼──▶ Replica
-                                                  │         │  (R+W)  │        │
-                                                  │         └─────────┘        │
-                                                  └──────────────────────────┘
-
-Retour (Réponse HTTP) :
-┌─────────┐     ┌─────────┐     ┌─────────┐     ┌──────────────────────────┐
-│Client   │◄────│   DNS   │◄────│ HAproxy │◄────│      Serveur 1 ou 2      │
-│(Browser)│     │(Resolve)│     │  (LB)   │     │  ┌─────────┐  ┌────────┐ │
-└─────────┘     └─────────┘     └─────────┘     │  │  Nginx  │◄─│  App   │ │
-                                                  │  │ (Web)   │  │ Server │ │
-                                                  │  └─────────┘  └────────┘ │
-                                                  │              ▲             │
-                                                  │         ┌────┴────┐        │
-                                                  │         │  MySQL  │        │
-                                                  │         │Primary ◀─┼──◀ Replica
-                                                  │         │  (R+W)  │        │
-                                                  │         └─────────┘        │
-                                                  └──────────────────────────┘
-```
-
-1. **DNS (Aller)** — Le navigateur demande au DNS : "Quelle est l'IP de `www.foobar.com` ?" → Réponse : IP du Load Balancer
-2. **HAproxy** reçoit la requête et la distribue à un serveur (Round Robin)
-3. **Nginx → App → MySQL** sur le serveur choisi
-4. **Retour** — La réponse remonte : MySQL → App → Nginx → HAproxy → Client (même connexion TCP)
+1. **DNS** — Le navigateur demande au DNS : "Quelle est l'IP de `www.foobar.com` ?" → Réponse : IP du Load Balancer
+2. La requête arrive sur le **Load Balancer (HAproxy)**
+3. **HAproxy distribue** la requête à l'un des deux serveurs selon l'algorithme **Round Robin**
+4. Le **serveur choisi** traite la requête : Nginx → App Server → MySQL
+5. La réponse remonte jusqu'à l'utilisateur
 
 ---
 
