@@ -11,7 +11,7 @@
 1. **DNS** — Le navigateur demande au DNS : "Quelle est l'IP de `www.foobar.com` ?" → Réponse : IP virtuelle du cluster de Load Balancers
 2. La requête arrive sur le **Load Balancer Cluster** (HAproxy 1 ou HAproxy 2)
 3. Si HAproxy 1 tombe, HAproxy 2 prend le relais automatiquement (failover)
-4. Le LB distribue la requête à un **Web Server** (Nginx only)
+4. Le LB distribue la requête à un **Web Server** (Nginx)
 5. Nginx sert les fichiers statiques et fait reverse proxy vers un **App Server**
 6. L'App Server exécute le code métier et interroge le **MySQL Cluster** si besoin
 7. MySQL Primary gère les écritures, Replica gère les lectures
@@ -23,7 +23,7 @@
 
 | Élément | Pourquoi on l'ajoute |
 |---------|---------------------|
-| **1 serveur additionnel** | Plus de redondance et de capacité |
+| **Serveurs additionnels** | Plus de redondance et de capacité — **2 web servers, 2 app servers** |
 | **2ème Load Balancer (HAproxy)** | Configuré en **cluster** avec le premier. Si un LB tombe, l'autre prend le relais automatiquement. |
 | **Séparation des composants** | Chaque type de serveur fait UNE SEULE chose : web, application, ou database |
 
@@ -34,7 +34,9 @@
 **La séparation des tiers :**
 
 - **Serveurs Web uniquement** — Nginx. Servent les assets statiques et font le reverse-proxy vers les app servers.
+  - **2 serveurs** pour la redondance et la distribution de charge
 - **Serveurs Application uniquement** — Exécutent le code métier (Gunicorn, uWSGI, etc.).
+  - **2 serveurs** pour la redondance et la distribution de charge
 - **Serveurs Database uniquement** — MySQL Primary-Replica. Gèrent uniquement les données.
 
 **Pourquoi séparer :** Chaque composant a des besoins de ressources différents :
@@ -48,6 +50,54 @@ En les séparant, on peut scaler chaque tier indépendamment selon ses besoins. 
 - Les deux load balancers sont actifs simultanément
 - Ils partagent la configuration et l'état
 - Si un tombe, l'autre continue de distribuer le traffic — **plus de SPOF au niveau du LB**
+
+---
+
+## Diagramme avec icônes
+
+```
+┌─────────┐     ┌─────────┐     ┌─────────────────────────┐
+│  👤     │────►│   🌐    │────►│   ⚖️ LOAD BALANCER      │
+│  USER   │     │   DNS   │     │   CLUSTER               │
+└─────────┘     └─────────┘     │  ┌─────────┐┌─────────┐ │
+                                │  │HAProxy 1││HAProxy 2│ │
+                                │  │  ⚖️    ││  ⚖️    │ │
+                                │  └────┬────┘└────┬────┘ │
+                                └───────┼──────────┼──────┘
+                                        │          │
+                              ┌─────────┘          │
+                              │    ┌─────────────────┘
+                              │    │
+                           ┌──▼──┐┌─▼──┐
+                           │ 🌐  ││ 🌐  │  ← 2 Web Servers
+                           │WEB 1││WEB 2│    (Nginx)
+                           │ ⚡  ││ ⚡  │
+                           └──┬──┘└──┬──┘
+                              │      │
+                           ┌──▼──┐┌──▼──┐
+                           │ ⚙️  ││ ⚙️  │  ← 2 App Servers
+                           │APP 1││APP 2│    (Python)
+                           │ 🐍  ││ 🐍  │
+                           └──┬──┘└──┬──┘
+                              │      │
+                           ┌──▼──┐┌──▼──┐
+                           │ 🗄️  ││ 🗄️  │  ← MySQL Cluster
+                           │ DB  ││ DB  │
+                           │MASTER││REPLICA│
+                           │ 📝  ││ 📖  │
+                           └─────┘└─────┘
+```
+
+**Légende :**
+- 👤 = Utilisateur
+- 🌐 = DNS / Web Server
+- ⚖️ = Load Balancer (HAProxy)
+- ⚡ = Nginx
+- ⚙️ = Application Server
+- 🐍 = Python
+- 🗄️ = Database
+- 📝 = Primary (écritures)
+- 📖 = Replica (lectures)
 
 ---
 
