@@ -2,54 +2,54 @@
 
 ![Distributed Web Infrastructure](./assets/1-distributed_web_infrastructure.png)
 
-## Explication du schéma
+## Diagram Explanation
 
-**Le scénario :** Un utilisateur tape `www.foobar.com` dans son navigateur.
+**The scenario:** A user types `www.foobar.com` in their browser.
 
-**Le flux de la requête :**
+**The request flow:**
 
-1. **DNS** — Le navigateur demande au DNS : "Quelle est l'IP de `www.foobar.com` ?" → Réponse : IP du Load Balancer
-2. La requête arrive sur le **Load Balancer (HAproxy)**
-3. **HAproxy distribue** la requête à l'un des deux serveurs selon l'algorithme **Round Robin**
-4. Le **serveur choisi** traite la requête : Nginx → App Server → MySQL
-5. La réponse remonte jusqu'à l'utilisateur
-
----
-
-### Pourquoi on ajoute chaque élément
-
-| Élément | Pourquoi on l'ajoute |
-|---------|---------------------|
-| **Load Balancer (HAproxy)** | Distribuer le traffic entre les 2 serveurs pour éviter la surcharge d'un seul |
-| **2ème serveur** | Redondance + double capacité de traitement |
-| **Primary-Replica MySQL** | Le Primary gère les écritures, le Replica les lectures = on peut scale les requêtes de lecture |
+1. **DNS** — The browser asks the DNS: "What is the IP of `www.foobar.com`?" → Answer: Load Balancer's IP
+2. The request arrives on the **Load Balancer (HAproxy)**
+3. **HAproxy distributes** the request to one of the two servers according to the **Round Robin** algorithm
+4. The **chosen server** processes the request: Nginx → App Server → MySQL
+5. The response goes back up to the user
 
 ---
 
-### Spécificités techniques
+### Why We Add Each Element
 
-- **Algorithme du LB : Round Robin** — Les requêtes arrivent une par une : requête 1 → serveur 1, requête 2 → serveur 2, requête 3 → serveur 1, etc. C'est simple et équitable.
-
-- **Active-Active vs Active-Passive :**
-  - **Active-Active** (ce qu'on utilise ici) → Les deux serveurs traitent les requêtes **en même temps**. Toute la puissance est utilisée.
-  - **Active-Passive** → Un serveur travaille, l'autre attend en standby. Si le premier tombe, le second prend le relais. Moins efficace mais plus simple.
-
-- **MySQL Primary-Replica (Master-Slave) :**
-  - Le **Primary** reçoit toutes les requêtes d'écriture (INSERT, UPDATE, DELETE)
-  - Il écrit ces changements dans un **binary log**
-  - Le **Replica** se connecte au Primary, lit le binary log, et applique les mêmes changements sur sa propre copie des données
-  - C'est **asynchrone** — le Replica peut avoir un léger retard sur le Primary
-
-- **Différence Primary vs Replica pour l'application :**
-  - Le **Primary** accepte **lectures + écritures**
-  - Le **Replica** accepte seulement **lectures** (read-only)
+| Element | Why We Add It |
+|---------|---------------|
+| **Load Balancer (HAproxy)** | Distribute traffic between the 2 servers to avoid overloading a single one |
+| **2nd server** | Redundancy + double processing capacity |
+| **Primary-Replica MySQL** | The Primary handles writes, the Replica handles reads = we can scale read queries |
 
 ---
 
-## Problèmes
+### Technical Specifics
 
-- 🔴 **Le load balancer est un SPOF** — S'il tombe, plus de distribution = site mort
-- 🔴 **Pas de firewall** — Les serveurs sont exposés directement à Internet
-- 🔴 **Pas de HTTPS** — Le traffic est en clair, interceptable par un attaquant
-- 🔴 **Pas de monitoring** — On ne sait pas si quelque chose est cassé ou lent
-- 🔴 **Mêmes composants sur chaque serveur** — Si on veut plus de puissance DB, on est obligé d'ajouter aussi Nginx + App Server sur la même machine, ce qui n'est pas optimal
+- **LB Algorithm: Round Robin** — Requests arrive one by one: request 1 → server 1, request 2 → server 2, request 3 → server 1, etc. It is simple and fair.
+
+- **Active-Active vs Active-Passive:**
+  - **Active-Active** (what we use here) → Both servers process requests **at the same time**. All power is used.
+  - **Active-Passive** → One server works, the other waits in standby. If the first goes down, the second takes over. Less efficient but simpler.
+
+- **MySQL Primary-Replica (Master-Slave):**
+  - The **Primary** receives all write queries (INSERT, UPDATE, DELETE)
+  - It writes these changes to a **binary log**
+  - The **Replica** connects to the Primary, reads the binary log, and applies the same changes to its own copy of the data
+  - It is **asynchronous** — the Replica may have a slight lag behind the Primary
+
+- **Difference Primary vs Replica for the application:**
+  - The **Primary** accepts **reads + writes**
+  - The **Replica** accepts only **reads** (read-only)
+
+---
+
+## Issues
+
+- 🔴 **The load balancer is a SPOF** — If it goes down, no more distribution = site dead
+- 🔴 **No firewall** — The servers are exposed directly to the Internet
+- 🔴 **No HTTPS** — Traffic is in clear text, interceptable by an attacker
+- 🔴 **No monitoring** — We don't know if something is broken or slow
+- 🔴 **Same components on each server** — If we want more DB power, we are forced to also add Nginx + App Server on the same machine, which is not optimal
