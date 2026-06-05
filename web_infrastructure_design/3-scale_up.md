@@ -2,69 +2,69 @@
 
 ![Scale Up Infrastructure](./assets/3-scale_up.png)
 
-## Explication du schéma
+## Diagram Explanation
 
-**Le scénario :** Un utilisateur tape `www.foobar.com` dans son navigateur.
+**The scenario:** A user types `www.foobar.com` in their browser.
 
-**Le flux de la requête :**
+**The request flow:**
 
-1. **DNS** — Le navigateur demande au DNS : "Quelle est l'IP de `www.foobar.com` ?" → Réponse : IP virtuelle du cluster de Load Balancers
-2. La requête arrive sur le **Load Balancer Cluster** (HAproxy 1 ou HAproxy 2)
-3. Si HAproxy 1 tombe, HAproxy 2 prend le relais automatiquement (failover)
-4. Le LB distribue la requête à un **Web Server** (Nginx only)
-5. Nginx sert les fichiers statiques et fait reverse proxy vers un **App Server**
-6. L'App Server exécute le code métier et interroge le **MySQL Cluster** si besoin
-7. MySQL Primary gère les écritures, Replica gère les lectures
-8. La réponse remonte jusqu'à l'utilisateur
-
----
-
-### Pourquoi on ajoute chaque élément
-
-| Élément | Pourquoi on l'ajoute |
-|---------|---------------------|
-| **1 serveur additionnel** | Plus de redondance et de capacité |
-| **2ème Load Balancer (HAproxy)** | Configuré en **cluster** avec le premier. Si un LB tombe, l'autre prend le relais automatiquement. |
-| **Séparation des composants** | Chaque type de serveur fait UNE SEULE chose : web, application, ou database |
+1. **DNS** — The browser asks the DNS: "What is the IP of `www.foobar.com`?" → Answer: Virtual IP of the Load Balancer Cluster
+2. The request arrives on the **Load Balancer Cluster** (HAproxy 1 or HAproxy 2)
+3. If HAproxy 1 goes down, HAproxy 2 takes over automatically (failover)
+4. The LB distributes the request to a **Web Server** (Nginx only)
+5. Nginx serves static files and reverse-proxies to an **App Server**
+6. The App Server executes the business logic and queries the **MySQL Cluster** if needed
+7. MySQL Primary handles writes, Replica handles reads
+8. The response goes back up to the user
 
 ---
 
-### Spécificités techniques
+### Why We Add Each Element
 
-**La séparation des tiers :**
-
-- **Serveurs Web uniquement** — Nginx. Servent les assets statiques et font le reverse-proxy vers les app servers.
-- **Serveurs Application uniquement** — Exécutent le code métier (Gunicorn, uWSGI, etc.).
-- **Serveurs Database uniquement** — MySQL Primary-Replica. Gèrent uniquement les données.
-
-**Pourquoi séparer :** Chaque composant a des besoins de ressources différents :
-- La **DB** a besoin de beaucoup de RAM et de disque rapide (SSD)
-- Le **web server** a besoin de bande passante réseau
-- L'**app server** a besoin de CPU
-
-En les séparant, on peut scaler chaque tier indépendamment selon ses besoins. Ex : si le traffic augmente mais pas les écritures DB, on ajoute juste des serveurs web.
-
-**Le LB en cluster Active-Active :**
-- Les deux load balancers sont actifs simultanément
-- Ils partagent la configuration et l'état
-- Si un tombe, l'autre continue de distribuer le traffic — **plus de SPOF au niveau du LB**
+| Element | Why We Add It |
+|---------|---------------|
+| **1 additional server** | More redundancy and capacity |
+| **2nd Load Balancer (HAproxy)** | Configured in **cluster** with the first one. If one LB goes down, the other takes over automatically. |
+| **Separation of components** | Each type of server does ONE THING only: web, application, or database |
 
 ---
 
-## Récap de l'évolution
+### Technical Specifics
+
+**Tier Separation:**
+
+- **Web Servers only** — Nginx. Serve static assets and reverse-proxy to the app servers.
+- **Application Servers only** — Execute business logic (Gunicorn, uWSGI, etc.).
+- **Database Servers only** — MySQL Primary-Replica. Handle only data.
+
+**Why separate:** Each component has different resource needs:
+- The **DB** needs a lot of RAM and fast disk (SSD)
+- The **web server** needs network bandwidth
+- The **app server** needs CPU
+
+By separating them, we can scale each tier independently according to its needs. Ex: if traffic increases but DB writes don't, we just add web servers.
+
+**The LB in Active-Active Cluster:**
+- Both load balancers are active simultaneously
+- They share configuration and state
+- If one goes down, the other continues to distribute traffic — **no more SPOF at the LB level**
+
+---
+
+## Evolution Recap
 
 ```
-ÉTAPE 0 : 1 serveur tout-en-un
-  ❌ SPOF | ❌ Pas de scale | ❌ Downtime déploiement
+STEP 0: 1 all-in-one server
+  ❌ SPOF | ❌ No scale | ❌ Deployment downtime
 
-ÉTAPE 1 : 3 serveurs + LB + DB Primary-Replica
-  ✅ Redondance serveurs | ✅ Scale lectures DB
-  ❌ LB = SPOF | ❌ Pas de sécurité | ❌ Pas de monitoring
+STEP 1: 3 servers + LB + DB Primary-Replica
+  ✅ Server redundancy | ✅ Scale DB reads
+  ❌ LB = SPOF | ❌ No security | ❌ No monitoring
 
-ÉTAPE 2 : + Firewalls + HTTPS + Monitoring
-  ✅ Sécurisé | ✅ Monitoré | ✅ Encrypté
-  ❌ SSL termination au LB | ❌ 1 seul Master DB | ❌ Composants mélangés
+STEP 2: + Firewalls + HTTPS + Monitoring
+  ✅ Secured | ✅ Monitored | ✅ Encrypted
+  ❌ SSL termination at LB | ❌ 1 single Master DB | ❌ Mixed components
 
-ÉTAPE 3 : Cluster LB + Tiers séparés
-  ✅ Plus de SPOF LB | ✅ Scale indépendant par tier
+STEP 3: LB Cluster + Separate Tiers
+  ✅ No more LB SPOF | ✅ Independent scale per tier
 ```

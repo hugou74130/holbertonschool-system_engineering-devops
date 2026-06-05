@@ -2,38 +2,38 @@
 
 ![Simple Web Stack](./assets/0-simple_web_stack.png)
 
-## Explication du schéma
+## Diagram Explanation
 
-**Le scénario :** Un utilisateur tape `www.foobar.com` dans son navigateur.
+**The scenario:** A user types `www.foobar.com` in their browser.
 
-**Le flux de la requête :**
+**The request flow:**
 
-1. **DNS** — Le navigateur demande au DNS : "Quelle est l'IP de `www.foobar.com` ?" → Réponse : `8.8.8.8`
-2. La requête HTTP arrive sur le **serveur unique**
-3. **Web Server (Nginx)** — Reçoit la requête. S'il s'agit de fichiers statiques (HTML, CSS, images), il les sert directement
-4. **Application Server** — Si la requête nécessite du calcul (ex: générer une page dynamique), Nginx la transmet à l'app server qui exécute le code
-5. **Database (MySQL)** — Si l'application a besoin de données, elle interroge la base de données
-6. La réponse remonte jusqu'à l'utilisateur
+1. **DNS** — The browser asks the DNS: "What is the IP of `www.foobar.com`?" → Answer: `8.8.8.8`
+2. The HTTP request arrives on the **single server**
+3. **Web Server (Nginx)** — Receives the request. If it is static files (HTML, CSS, images), it serves them directly
+4. **Application Server** — If the request requires computation (e.g., generating a dynamic page), Nginx forwards it to the app server which executes the code
+5. **Database (MySQL)** — If the application needs data, it queries the database
+6. The response goes back up to the user
 
-**Communication :** Le serveur communique avec l'ordinateur de l'utilisateur via le **protocole TCP/IP** (HTTP sur port 80).
-
----
-
-### Définitions des composants
-
-- **Un serveur** est une machine physique ou virtuelle, généralement située dans un data center, qui fait tourner un OS.
-- **Le rôle du domaine** (`www.foobar.com`) est de fournir un nom humainement lisible qui pointe vers l'IP du serveur via le DNS.
-- **`www.foobar.com` est un A record** car il résout directement en une adresse IP (`8.8.8.8`).
-- **Le rôle du web server (Nginx)** est de servir les pages web et le contenu statique (HTML, CSS, images).
-- **Le rôle de l'application server** est de calculer le contenu dynamique (exécuter le code métier).
-- **Le rôle de la database (MySQL)** est de stocker les données persistantes de l'application.
-- **Le code base** contient les fichiers de l'application.
-- **Le serveur communique** avec l'ordinateur de l'utilisateur via le réseau (protocole TCP/IP).
+**Communication:** The server communicates with the user's computer via the **TCP/IP protocol** (HTTP on port 80).
 
 ---
 
-## Problèmes
+### Component Definitions
 
-- 🔴 **SPOF (Single Point of Failure)** — Un seul serveur. Si la machine tombe, le site est mort. Pas de backup.
-- 🔴 **Downtime au déploiement** — Quand on déploie du nouveau code, il faut redémarrer Nginx. Le site est offline pendant ce temps.
-- 🔴 **Impossible de scaler** — Si le traffic augmente, le serveur sature. On ne peut pas ajouter de capacité sans tout refaire.
+- **A server** is a physical or virtual machine, usually located in a data center, that runs an OS.
+- **The role of the domain** (`www.foobar.com`) is to provide a human-readable name that points to the server's IP via DNS.
+- **`www.foobar.com` is an A record** because it resolves directly to an IP address (`8.8.8.8`).
+- **The role of the web server (Nginx)** is to serve web pages and static content (HTML, CSS, images).
+- **The role of the application server** is to compute dynamic content (execute business logic).
+- **The role of the database (MySQL)** is to store the application's persistent data.
+- **The code base** contains the application's files.
+- **The server communicates** with the user's computer via the network (TCP/IP protocol).
+
+---
+
+## Issues
+
+- 🔴 **SPOF (Single Point of Failure)** — A single server. If the machine goes down, the site is dead. No backup.
+- 🔴 **Downtime during deployment** — When we deploy new code, we need to restart Nginx. The site is offline during this time.
+- 🔴 **Impossible to scale** — If traffic increases, the server saturates. We cannot add capacity without rebuilding everything.
